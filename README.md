@@ -1,12 +1,40 @@
-## BiBERT: Accurate Fully Binarized BERT
+# BiBERT: Accurate Fully Binarized BERT
+
+**ICLR 2022**
+
+Haotong Qin, Yifu Ding, Mingyuan Zhang, Qinghua Yan, Aishan Liu, Qingqing Dang, Ziwei Liu, Xianglong Liu
+
+[Paper](https://openreview.net/forum?id=5xEgrl_5FAJ) | [arXiv](https://arxiv.org/abs/2203.06390) | [Citation](#citation)
+
+**BiBERT enables 1-bit weights, word embeddings, and activations in BERT using information-preserving Bi-Attention and Direction-Matching Distillation (DMD).** It targets the accuracy loss of fully binarized language encoders and requires task data and a full-precision teacher for training.
+
+## Published results
+
+BERT-base on the GLUE development sets, **without data augmentation** (Table 2). W/E/A denotes weights/word embeddings/activations. The average follows the paper's aggregation of GLUE metrics; it is not a single-task accuracy. The FLOPs column uses the paper's bit-operation accounting.
+
+| Method | W/E/A | Model size (MB) | FLOPs (G) | GLUE average |
+| --- | --- | --- | --- | --- |
+| Full precision | 32/32/32 | 418 | 22.5 | 83.9 |
+| BinaryBERT | 1/1/4 | 16.5 | 1.5 | 79.9 |
+| BinaryBERT | 1/1/1 | 16.5 | 0.4 | 41.0 |
+| Fully binary baseline | 1/1/1 | 13.4 | 0.4 | 50.4 |
+| BiBERT | 1/1/1 | 13.4 | 0.4 | 63.2 |
+
+The reported **56.3× FLOPs reduction and 31.2× model-size reduction** are relative to full-precision BERT-base (Section 4.2). They are theoretical computation and parameter storage figures, not measured latency or peak runtime memory. Higher-bit BinaryBERT still has higher average accuracy in the 1/1/4 setting above.
+
+### What this paper supports
+
+- Bi-Attention addresses the information bottleneck caused by binarizing attention probabilities (Section 3.2).
+- DMD transfers query/key/value similarity patterns to alleviate optimization-direction mismatch in distillation (Section 3.3).
+- Combining Bi-Attention and DMD improves SST-2 from 77.6 to 88.7 without augmentation in the BERT-base ablation (Table 1).
+- Under the fully binary comparison without augmentation, BiBERT raises the GLUE average from 50.4 to 63.2 over the straightforward baseline (Table 2).
+- The method extends to the evaluated 6-layer and 4-layer TinyBERT architectures; data-augmented results are reported separately (Tables 2 and 3).
+
+## Code and usage
 
 Created by [Haotong Qin](https://htqin.github.io/), [Yifu Ding](https://yifu-ding.github.io/), [Mingyuan Zhang](https://scholar.google.com/citations?user=2QLD4fAAAAAJ&hl=en), Qinghua Yan, [Aishan Liu](https://liuaishan.github.io/), Qingqing Dang, [Ziwei Liu](https://liuziwei7.github.io/), and [Xianglong Liu](https://xlliu-beihang.github.io/) from Beihang University, Nanyang Technological University, and Baidu Inc. [[PaddlePaddle Version]](https://github.com/PaddlePaddle/PaddleSlim/tree/develop/demo/quant/BiBERT)
 
 ![loading-ag-172](./resources/overview.png)
-
-## Introduction
-
-This project is the official implementation of our accepted ICLR 2022 paper *BiBERT: Accurate Fully Binarized BERT* [[PDF](https://openreview.net/forum?id=5xEgrl_5FAJ)]. The large pre-trained BERT has achieved remarkable performance on Natural Language Processing (NLP) tasks but is also computation and memory expensive. As one of the powerful compression approaches, binarization extremely reduces the computation and memory consumption by utilizing 1-bit parameters and bitwise operations. Unfortunately, the full binarization of BERT (i.e., 1-bit weight, embedding, and activation) usually suffer a significant performance drop, and there is rare study addressing this problem. In this paper, with the theoretical justification and empirical analysis, we identify that the severe performance drop can be mainly attributed to the information degradation and optimization direction mismatch respectively in the forward and backward propagation, and propose BiBERT, an accurate fully binarized BERT, to eliminate the performance bottlenecks. Specifically, BiBERT introduces an efficient Bi-Attention structure for maximizing representation information statistically and a Direction-Matching Distillation (DMD) scheme to optimize the full binarized BERT accurately. Extensive experiments show that BiBERT outperforms both the straightforward baseline and existing state-of-the-art quantized BERTs with ultra-low bit activations by convincing margins on the NLP benchmark. As the first fully binarized BERT, our method yields impressive 59.2x and 31.2x saving on FLOPs and model size, demonstrating the vast advantages and potential of the fully binarized BERT model in real-world resource-constrained scenarios.
 
 ## Dependencies
 
@@ -16,7 +44,7 @@ pip install -r requirements.txt
 
 ## Datasets
 
-We train and test BinaryBERT on GLUE and SQuAD benchmarks. Both dataset are available online:
+The paper reports GLUE experiments. This repository also retains SQuAD-related code from its upstream implementations; the GLUE results above do not establish a SQuAD result. Dataset resources:
 
 - **GLUE**: https://github.com/nyu-mll/GLUE-baselines
 - **SQuAD**: https://rajpurkar.github.io/SQuAD-explorer/
@@ -33,14 +61,14 @@ The original code is borrowed from [BinaryBERT](https://github.com/huawei-noah/P
 
 ## Citation
 
-If you find our work useful in your research, please consider citing:
+Please cite the published paper below. Open paper versions are linked at the top of this README.
 
-```shell
+```bibtex
 @inproceedings{Qin:iclr22,
-  author    = {Haotong Qin and Yifu Ding and Mingyuan Zhang and Qinghua Yan and 
-  Aishan Liu and Qingqing Dang and Ziwei Liu and Xianglong Liu},
-  title     = {BiBERT: Accurate Fully Binarized BERT},
-  booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2022}
+  title = {{BiBERT}: Accurate Fully Binarized {BERT}},
+  author = {Haotong Qin and Yifu Ding and Mingyuan Zhang and Qinghua Yan and Aishan Liu and Qingqing Dang and Ziwei Liu and Xianglong Liu},
+  booktitle = {International Conference on Learning Representations},
+  year = {2022},
+  url = {https://openreview.net/forum?id=5xEgrl_5FAJ}
 }
 ```
